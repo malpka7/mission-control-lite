@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mission Control (Lite) — Hubert</title>
+  <meta name="description" content="Prosty Mission Control: zadania, cron, pamięć, team." />
+  <style>
+    :root{--bg:#0b1220;--card:rgba(255,255,255,.05);--line:rgba(255,255,255,.10);--text:#e8eefc;--muted:#a9b6d6;--brand:#7c5cff;--good:#31d0aa;--bad:#ff5577;}
+    *{box-sizing:border-box} html,body{margin:0;padding:0} body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; background:var(--bg); color:var(--text);}
+    a{color:inherit}
+    .wrap{max-width:1200px;margin:0 auto;padding:18px}
+    header{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap; padding:10px 0 18px; border-bottom:1px solid var(--line)}
+    .brand{display:flex;gap:10px;align-items:center}
+    .logo{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,var(--brand),#4dd9ff);}
+    h1{font-size:18px;margin:0}
+    .muted{color:var(--muted)}
+    nav{display:flex;gap:8px;flex-wrap:wrap}
+    .tab{padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:transparent;cursor:pointer;color:var(--text)}
+    .tab[aria-selected="true"]{background:rgba(124,92,255,.18);border-color:rgba(124,92,255,.35)}
+    .row{display:grid;grid-template-columns:1.3fr .7fr;gap:12px;margin-top:14px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .k{font-size:12px;color:var(--muted)} .v{font-size:18px;font-weight:800}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:transparent;color:var(--text);padding:8px 10px;border-radius:12px;cursor:pointer}
+    .btn.primary{background:linear-gradient(135deg,var(--brand),#5f7cff);color:#0b1220;border:0;font-weight:800}
+    .btn.danger{border-color:rgba(255,85,119,.4)}
+    input,select,textarea{width:100%;padding:10px 10px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.20);color:var(--text)}
+    textarea{min-height:84px;resize:vertical}
+    .grid{display:grid;gap:10px}
+
+    .kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .col{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:rgba(0,0,0,.10)}
+    .col h3{margin:0;padding:10px 10px;border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)}
+    .items{padding:10px;display:grid;gap:8px;min-height:120px}
+    .item{border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px;background:rgba(0,0,0,.18)}
+    .item .t{font-weight:800;font-size:13px}
+    .item .s{font-size:12px;color:var(--muted);margin-top:4px}
+    .pill{display:inline-flex;gap:6px;align-items:center;font-size:11px;color:var(--muted)}
+    .dot{width:8px;height:8px;border-radius:999px;display:inline-block}
+
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{border-bottom:1px solid var(--line);padding:8px 6px;vertical-align:top}
+    th{text-align:left;color:var(--muted);font-weight:700}
+
+    .hidden{display:none}
+    @media (max-width: 980px){.row{grid-template-columns:1fr}.kanban{grid-template-columns:1fr 1fr}}
+    @media (max-width: 520px){.kanban{grid-template-columns:1fr}.cards{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Mission Control (Lite)</h1>
+          <div class="muted" id="sub">Zadania • Cron • Pamięć • Team</div>
+        </div>
+      </div>
+      <nav role="tablist" aria-label="Sekcje">
+        <button class="tab" role="tab" aria-selected="true" data-tab="tasks">Zadania</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="cron">Cron</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="memory">Pamięć</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="team">Team</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="settings">Ustawienia</button>
+      </nav>
+    </header>
+
+    <section id="view_tasks">
+      <div class="row">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <div>
+              <div class="k">Tablica zadań</div>
+              <div class="muted">Przeciąganie dojdzie w v2. Na razie szybkie: edytuj status w zadaniu.</div>
+            </div>
+            <button class="btn primary" id="addTask">+ Nowe zadanie</button>
+          </div>
+          <div style="height:10px"></div>
+          <div class="kanban" id="kanban"></div>
+        </div>
+
+        <div class="card">
+          <div class="k">Szybkie staty</div>
+          <div style="height:8px"></div>
+          <div class="cards">
+            <div class="card"><div class="k">Otwarte</div><div class="v" id="stat_open">0</div></div>
+            <div class="card"><div class="k">W toku</div><div class="v" id="stat_doing">0</div></div>
+            <div class="card"><div class="k">Zrobione</div><div class="v" id="stat_done">0</div></div>
+          </div>
+          <div style="height:10px"></div>
+          <div class="k">Szybki import</div>
+          <div class="muted">Wklej JSON zadań (opcjonalnie).</div>
+          <div style="height:8px"></div>
+          <textarea id="importBox" placeholder='[{"title":"...","owner":"Ahmed","status":"open"}]'></textarea>
+          <div style="height:8px"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" id="importBtn">Import</button>
+            <button class="btn" id="exportBtn">Export JSON</button>
+            <button class="btn danger" id="resetBtn">Reset</button>
+          </div>
+          <div style="height:10px"></div>
+          <div class="k">Uwaga</div>
+          <div class="muted">To jest MVP (statyczne HTML + localStorage). Kolejny krok: wersja z backendem (cron + pamięć z plików) i deploy.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view_cron" class="hidden">
+      <div class="card">
+        <div class="k">Cron</div>
+        <div class="muted">W MVP tylko placeholder. W v2 podpinamy listę jobów z gateway i historię odpaleń.</div>
+      </div>
+    </section>
+
+    <section id="view_memory" class="hidden">
+      <div class="card">
+        <div class="k">Pamięć</div>
+        <div class="muted">W MVP placeholder. W v2: lista plików memory/*.md + wyszukiwarka.</div>
+      </div>
+    </section>
+
+    <section id="view_team" class="hidden">
+      <div class="card">
+        <div class="k">Team</div>
+        <div class="muted">W MVP placeholder. W v2: subagenci, role, checklista.</div>
+      </div>
+    </section>
+
+    <section id="view_settings" class="hidden">
+      <div class="card">
+        <div class="k">Ustawienia</div>
+        <div class="muted">W v2: integracja z VPS gateway + tokeny + environment.</div>
+      </div>
+    </section>
+
+    <div style="height:16px"></div>
+    <div class="muted" style="font-size:12px">© Mission Control Lite</div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
