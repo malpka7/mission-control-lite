@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mission Control V2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Mission Control V2</h1>
+          <div class="muted">Tasks • Crons • Models • Skills • Agents</div>
+        </div>
+      </div>
+      <nav class="tabs" role="tablist" aria-label="Sections">
+        <button class="tab is-active" data-tab="tasks" aria-selected="true">Tasks</button>
+        <button class="tab" data-tab="crons">Crons</button>
+        <button class="tab" data-tab="models">Models</button>
+        <button class="tab" data-tab="skills">Skills</button>
+        <button class="tab" data-tab="agents">Agents</button>
+        <button class="tab" data-tab="add">Add Agent</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="view_tasks">
+        <div class="kanban" id="kanban">
+          <div class="col">
+            <h3>Open</h3>
+            <div class="items" id="open-tasks">
+              <div class="item">
+                <div class="item-title">Proton cron</div>
+                <div class="item-meta">Ahmed</div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <h3>Doing</h3>
+            <div class="items" id="doing-tasks">
+              <div class="item">
+                <div class="item-title">Mission V2</div>
+                <div class="item-meta">Hubert</div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <h3>Done</h3>
+            <div class="items" id="done-tasks">
+              <div class="item">
+                <div class="item-title">Expenses check</div>
+                <div class="item-meta">Ahmed</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="btn primary" id="add-task">+ Add Task</button>
+      </section>
+
+      <section id="view_crons" hidden>
+        <div class="card">
+          <h3>Crons</h3>
+          <ul id="cron-list" class="list"></ul>
+        </div>
+      </section>
+
+      <section id="view_models" hidden>
+        <div class="card">
+          <h3>Models (API keys)</h3>
+          <ul id="models-list" class="list"></ul>
+        </div>
+      </section>
+
+      <section id="view_skills" hidden>
+        <div class="card">
+          <h3>Skills</h3>
+          <ul id="skills-list" class="list"></ul>
+        </div>
+      </section>
+
+      <section id="view_agents" hidden>
+        <div class="card">
+          <h3>Agents</h3>
+          <ul id="agents-list" class="list"></ul>
+        </div>
+      </section>
+
+      <section id="view_add" hidden>
+        <div class="card form-grid">
+          <h3>Add Agent</h3>
+          <input class="input" id="agent-name" placeholder="Name" />
+          <input class="input" id="agent-model" placeholder="Model (gpt-5)" />
+          <input class="input" id="agent-task" placeholder="Task" />
+          <button class="btn primary" id="spawn-agent">Spawn</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const sections = {
+      tasks: document.getElementById('view_tasks'),
+      crons: document.getElementById('view_crons'),
+      models: document.getElementById('view_models'),
+      skills: document.getElementById('view_skills'),
+      agents: document.getElementById('view_agents'),
+      add: document.getElementById('view_add'),
+    };
+    tabs.forEach(btn => btn.addEventListener('click', () => {
+      tabs.forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      Object.values(sections).forEach(s => s.hidden = true);
+      const key = btn.dataset.tab;
+      sections[key].hidden = false;
+    }));
+  </script>
+</body>
+</html>
