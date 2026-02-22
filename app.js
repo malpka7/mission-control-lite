@@ -4,9 +4,10 @@
   const checkBtn = document.querySelector('#check-update');
 
   async function fetchVersion() {
+    const cfg = window.MC_CONFIG||{};
     try {
-      if (window.MC_CONFIG && window.MC_CONFIG.versionUrl) {
-        const r = await fetch(window.MC_CONFIG.versionUrl, { cache: 'no-store' });
+      if (cfg.versionUrl) {
+        const r = await fetch(cfg.versionUrl, { cache: 'no-store' });
         const data = await r.json();
         if (data && data.version) {
           versionBadge.textContent = data.version;
@@ -41,5 +42,26 @@
     }
   });
 
+  // Agents & Crons render (from state API)
+  async function fetchState(){
+    try{
+      const cfg = window.MC_CONFIG||{};
+      if(!cfg.stateUrl) return;
+      const r = await fetch(cfg.stateUrl, { cache: 'no-store' });
+      const s = await r.json();
+      renderAgents(s.agents||[]);
+      renderCrons(s.crons||[]);
+    }catch(e){/* silent */}
+  }
+  function renderAgents(list){
+    const ul = document.getElementById('agents-list'); if(!ul) return; ul.innerHTML='';
+    list.forEach(a=>{ const li=document.createElement('li'); li.textContent=`${a.name||a.id} · ${a.model||''}`; ul.appendChild(li); });
+  }
+  function renderCrons(list){
+    const ul = document.getElementById('cron-list'); if(!ul) return; ul.innerHTML='';
+    list.forEach(c=>{ const li=document.createElement('li'); li.textContent=`${c.name||c.id} — ${c.schedule||''}`; ul.appendChild(li); });
+  }
+
   fetchVersion();
+  fetchState();
 })();
