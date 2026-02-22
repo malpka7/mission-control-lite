@@ -4,10 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mission Control V2</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css" />
+  <script>window.MC_CONFIG={versionUrl:null};</script>
 </head>
 <body>
   <div class="wrap">
@@ -17,6 +19,16 @@
         <div>
           <h1>Mission Control V2</h1>
           <div class="muted">Tasks • Crons • Models • Skills • Agents</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span class="pill">OpenClaw: <strong id="oc-version">…</strong></span>
+        <div class="menu-wrap">
+          <button class="btn" id="check-update">Sprawdź update</button>
+          <div class="menu" id="update-menu">
+            <button class="menu-item" data-copy="openclaw --version">Kopiuj: openclaw --version</button>
+            <button class="menu-item" data-copy="openclaw update status">Kopiuj: openclaw update status</button>
+          </div>
         </div>
       </div>
       <nav class="tabs" role="tablist" aria-label="Sections">
@@ -121,5 +133,6 @@
       sections[key].hidden = false;
     }));
   </script>
+  <script src="/app.js" defer></script>
 </body>
 </html>
